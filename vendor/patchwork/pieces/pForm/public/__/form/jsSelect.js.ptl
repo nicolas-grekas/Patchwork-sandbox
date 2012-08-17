@@ -1,0 +1,12 @@
+/*
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ */
+<!-- SET a$DATA --><!-- AGENT $f_select --><!-- END:SET
+
+-->document.write('<select '+a+'>'+(i&&!m?'<option value="" class="firstItem">'+c+'</option>':'')+{a$DATA|replace:'<select[^>]*>':''|replace:'<script.*':''|js});
+function jsSelectInit(o,v){var i,j,k;--v.length;o=o.options;for(i=0;i<o.length;++i){k=o[i];k.value=k.text;for(j in v)if(v[j]==k.text){k.selected=1;delete v[j];break}}}

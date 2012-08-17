@@ -1,0 +1,48 @@
+{* vi: set fenc=utf-8 ts=4 sw=4 et:
+ *
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ *}
+<!--
+{*
+
+a$_mode_ : ('errormsg'|'close'|'')
+a$_enterControl_ : 0 to keep the browser's behaviour,
+                   1 to disable submit on enter key press,
+                   2 to enable submit on enter key press by simulating
+                     a click on the submit/image element positioned
+                     after the currently focused element.
+
+*}
+
+IF a$_mode_ == 'errormsg'
+
+    IF a$_errormsg
+        --><div class="errormsg"><!--
+        LOOP a$_errormsg -->{$VALUE}<br><!-- END:LOOP
+        --></div><!--
+    END:IF
+
+ELSEIF a$_mode_ == 'close'
+
+    LOOP a$_hidden
+        --><input type="hidden" name="{$name}" value="{$value}"><!--
+    END:LOOP
+    --></form><!--
+
+ELSE
+
+    SET a$action --><!-- IF !a$action -->{g$__URI__}<!-- ELSE -->{base:a$action:1}<!-- END:IF --><!-- END:SET
+    IF !a$id --><!-- SET a$id -->FiD{g+1$GLOBID}{g$__AGENT__|replace:'[^_a-zA-Z0-9]':'_'}<!-- END:SET --><!-- END:IF
+
+    --><form accept-charset="utf-8" novalidate {a$|htmlArgs}><script>
+lF=document.getElementById({a$id|js});<!--
+IF a$_enterControl_ -->FeC({a$_enterControl_});<!-- END:IF --></script><!--
+
+    IF !g$_UPLOAD && a$_upload --><!-- SET g$_UPLOAD -->1<!-- END:SET --><script async src="{base:'js/upload'}"></script><!-- END:IF
+
+END:IF -->

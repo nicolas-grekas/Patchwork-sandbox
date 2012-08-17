@@ -1,0 +1,15 @@
+[submodule "pieces/pForm/pieces/fckeditor/public/__/fckeditor/src"]
+	path = pieces/pForm/pieces/fckeditor/public/__/fckeditor/src
+	url = git://github.com/nicolas-grekas/Patchwork-fckeditor.git
+[submodule "pieces/jQuery"]
+	path = pieces/jQuery
+	url = git://github.com/nicolas-grekas/Patchwork-jQuery.git
+[submodule "pieces/pForm/pieces/geodb"]
+	path = pieces/pForm/pieces/geodb
+	url = git://github.com/nicolas-grekas/Patchwork-geodb.git
+[submodule "variations/pStudio"]
+	path = variations/pStudio
+	url = git://github.com/nicolas-grekas/Patchwork-pStudio.git
+[submodule "pieces/doctrine"]
+	path = pieces/doctrine
+	url = git://github.com/nicolas-grekas/Patchwork-Doctrine.git

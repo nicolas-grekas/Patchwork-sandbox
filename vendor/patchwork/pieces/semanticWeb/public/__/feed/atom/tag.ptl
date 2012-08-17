@@ -1,0 +1,31 @@
+{* vi: set fenc=utf-8 ts=4 sw=4 et:
+ *
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ *}
+<!--
+
+IF a$required || a$value
+
+    SET a$a
+        IF a$type    --> type="{a$type}"<!--       END:IF -->{* Must be "text", "html" or "xhtml" *}<!--
+        IF a$src     --> src="{a$src}"<!--         END:IF -->{* Only for content *}<!--
+        IF a$uri     --> uri="{a$uri}"<!--         END:IF -->{* Only for generator *}<!--
+        IF a$version --> version="{a$version}"<!-- END:IF -->{* Only for generator *}<!--
+    END:SET
+
+    --><{a$__1__}{a$a}><!--
+
+    IF 'xhtml' == a$type --><div xmlns="http://www.w3.org/1999/xhtml">{a$value}</div><!--
+    ELSE -->{a$value}<!--
+    END:IF
+
+    --></{a$__1__}><!--
+
+END:IF
+
+-->

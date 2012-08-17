@@ -1,0 +1,45 @@
+{* vi: set fenc=utf-8 ts=4 sw=4 et:
+ *
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ *}
+<!--
+
+IF $fileUpload
+
+    --><script type="text/javascript">window.parent.frames.frmUpload.OnUploadCompleted({$number|js},{$filename|js})</script><!--
+
+ELSE
+
+    --><?xml version="1.0" encoding="utf-8" ?><!--
+
+    IF $command
+        --><Connector command="{$command}" resourceType="{$resourceType}">
+<CurrentFolder path="{$currentFolder}" url="{base:$currentUrl:1}" /><!--
+
+        IF $FOLDERS
+            --><Folders><!--
+            LOOP $FOLDERS --><Folder name="{$VALUE}" /><!-- END:LOOP
+            --></Folders><!--
+        END:IF
+
+        IF $FILES
+            --><Files><!--
+            LOOP $FILES --><File name="{$KEY}" size="{$VALUE}" /><!-- END:LOOP
+            --></Files><!--
+        END:IF
+
+        --></Connector><!--
+
+    ELSE
+        --><Connector><Error {$|htmlArgs} /></Connector><!--
+
+    END:IF
+
+END:IF
+
+-->

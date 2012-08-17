@@ -1,0 +1,22 @@
+{* vi: set fenc=utf-8 ts=4 sw=4 et:
+ *
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ *}
+<!-- AGENT 'header' title=a$title -->
+
+{a$message}
+
+<!-- IF a$time > 0 -->
+<script>
+<!-- SET a$redirect -->{base:a$redirect:1}<!-- END:SET -->
+<!-- SET a$a -->location.replace({a$redirect|js})<!-- END:SET -->
+setTimeout({a$a|js}, {a$time*1000})
+</script><meta http-equiv="refresh" content="{a$time}; URL={a$redirect}">
+<!-- END:IF -->
+
+<!-- AGENT 'footer' -->

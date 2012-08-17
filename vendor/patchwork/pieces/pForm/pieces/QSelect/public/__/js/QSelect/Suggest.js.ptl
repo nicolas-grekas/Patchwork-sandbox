@@ -1,0 +1,84 @@
+/*
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ */
+
+function QSelectSuggest($data, $separator, $separatorRx)
+{
+    if (!($separator && $separatorRx))
+    {
+        $separator = ' ';
+        $separatorRx = '[\\s,;]+';
+    }
+
+    return function($this, $input, $select, $options)
+    {
+        var $driver = QSelectSearch($data)($this, $input, $select, $options);
+
+        $driver.fixTab = 1;
+
+        $driver.search = function($query, $pushBack, $selectionStart)
+        {
+            if ('*' == $query) return $pushBack(QSelectSuggest.limit ? $data.slice(0, QSelectSuggest.limit) : $data);
+
+            var $result = [],
+                $i = 0,
+                $q;
+
+            $selectionStart = $selectionStart || $query.length;
+
+            $q = $query.substr($selectionStart).split(new RegExp($separatorRx + '[\\s\\S]*$'));
+
+            if ('' == $q[0])
+            {
+                $q = $query.substr(0, $selectionStart).replace(new RegExp('^[\\s\\S]*' + $separatorRx), '').replace(new RegExp('^[^0-9a-z' + ACCENT.join('') + ']+', 'i'), '');
+
+                if ($q)
+                {
+                    $q = RegExp.quote($q, 1);
+                    $q = new RegExp('(^|[^0-9a-z' + ACCENT.join('') + '])' + $q, 'i');
+
+                    for (; $i < $data.length; ++$i) if ($q.test((''+$data[$i]).replace(/@[-._a-z0-9]+/gi, ''))) $result[$result.length] = $data[$i];
+                }
+            }
+
+            $pushBack($result, $query, $selectionStart, 0);
+        }
+
+        $driver.onchange = function() {$input.focus();}
+
+        $driver.setValue = function()
+        {
+            var $idx = $select.selectedIndex,
+                $vBegin, $vEnd = $input.value,
+                $caretPos = getCaret($input);
+
+            $idx = $idx>0 ? $idx : 0;
+
+            $vBegin = $vEnd.substr(0, $caretPos);
+            $vEnd = $vEnd.substr($caretPos);
+
+            $vBegin = $vBegin.match(new RegExp('^([\\s\\S]*' + $separatorRx + ')'));
+            $vBegin = $vBegin ? $vBegin[1] : '';
+
+            $vBegin += $options[$idx].text + $separator;
+            $vEnd = $vBegin + $vEnd;
+            $vBegin = $vBegin.length;
+
+            $this.sync($vEnd);
+
+            setSel($input, $vBegin, $vBegin);
+            $input.focus();
+
+            return 1;
+        }
+
+        return $driver;
+    }
+}
+
+QSelectSuggest.limit = QSelectSearch.limit;

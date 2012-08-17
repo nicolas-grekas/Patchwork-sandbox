@@ -1,0 +1,48 @@
+/*
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ */
+
+
+<!-- IF $document_domain -->
+
+document.domain = {$document_domain|js};
+
+<!-- ELSE -->
+
+(function()
+{
+    var $document = document,
+        d = $document.domain,
+        w = window.opener || window.parent,
+        i;
+
+    for (;;)
+    {
+        try
+        {
+            i = w.document.domain;
+            break;
+        }
+        catch (e) {}
+
+        i = d.indexOf('.');
+        if (i < 0) break;
+        d = d.substr(i+1);
+
+        try
+        {
+            $document.domain = d;
+        }
+        catch (e)
+        {
+            break;
+        }
+    }
+})();
+
+<!-- END:IF -->

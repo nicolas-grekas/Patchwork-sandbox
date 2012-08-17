@@ -1,0 +1,64 @@
+/*
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ */
+
+
+/*
+* Set a board variable for data persistence across pages.
+*
+* WARNING: you must not use board variables to store any sensitive information.
+* See http://www.boutell.com/newfaq/creating/scriptpass.html for explanations.
+*/
+function setboard($name, $value)
+{
+    if (t($name, 'object')) for ($value in $name) setboard($value, $name[$value]);
+    else
+    {
+        $window = setboard.topwin;
+
+        $name = '%K' + eUC(document.domain + 0 + $name) + '%V';
+
+        var $winName = $window.name,
+            $varIdx = $winName.indexOf($name),
+            $varEndIdx;
+
+        if ($varIdx>=0)
+        {
+            $varEndIdx = $winName.indexOf('%K', $varIdx + $name.length);
+            $winName = $winName.substring(0, $varIdx) + ( $varEndIdx>=0 ? $winName.substring($varEndIdx) : '' );
+        }
+
+        $window.name = $winName + $name + eUC($value);
+    }
+}
+
+
+window.BOARD || (function()
+{
+    var $board = window, $i, $h = document.domain + 0;
+
+    if (t($board.Error)) try {while ((($i = $board.parent) != $board) && t($i.name)) $board = $i;} catch ($i) {}
+
+    setboard.topwin = $board;
+    $board = $board.name;
+
+    window.BOARD = {};
+    $i = $board.indexOf('%K');
+
+    if (0 <= $i)
+    {
+        $board = parseurl(
+            $board.substr($i).replace(
+                /%K/g, '&').replace(
+                /%V/g, '=')
+            , '&'
+        );
+
+        for ($i in $board) $i.indexOf($h) || (BOARD[ $i.substr($h.length) ] = $board[$i]);
+    }
+})();

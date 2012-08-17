@@ -1,0 +1,294 @@
+/*
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ */
+/*
+* Init this Javascript Remote Scripting object with
+* varname = new QJsrs($url, $POST, $antiCSRF), where $url is a server script aimed at
+* generating the result.
+* Set $POST to true if you want a POST request to be made to the server.
+* Set $antiCSRF to true if the server needs an anti-javascript-hijacking token
+*
+* Then call this server script _asynchronously_
+* with varname.push($vararray, $function)
+* Multiple .push() calls are executed sequentialy: a call is done
+* only when the previous one is finished.
+*
+* use varname.replace($vararray, $function) to empty the call sequence and then do the request
+* $vararray is an associative array, which is going to be passed to the server script.
+* $function(result) is called when the result is loaded.
+* Cancel the callback pool with varname.abort()
+*/
+
+$window = window;
+
+$window.base = $window.base || function($str, $noId, $master)
+{
+    'undefined' != typeof $str || ($str = '');
+
+    if (!/^[a-z][-.+a-z0-9]*:/i.test($str))
+    {
+        $master = {g$__BASE__|js};
+
+        $str = (
+            0 == $str.indexOf('/')
+            ? $master.substr(0, $master.indexOf('/', 8))
+            : $master
+        ) + $str;
+    }
+
+    return $str;
+}
+
+function $emptyFunction() {};
+
+// Preload the XMLHttp object and detects browser capabilities.
+var QJsrs = $window.ScriptEngineMajorVersion;
+if (QJsrs && QJsrs() >= 5) try {QJsrs = new ActiveXObject("Microsoft.XMLHTTP") && 2;} catch (e) {QJsrs = 1;}
+else QJsrs = $window.XMLHttpRequest ? new XMLHttpRequest && 3 : 1;
+
+QJsrs = (function()
+{
+
+var $contextPool = [],
+    $loadCounter = 0,
+    $masterTimer = 0,
+    $win = $window,
+    $document = document,
+    $div = 0,
+    $emptyFunction = $win.$emptyFunction,
+    $defaultFunction = $emptyFunction,
+    $XMLHttp = QJsrs - 1;
+
+$document.write('<div id="divQJsrs" style="position:absolute;visibility:hidden"><b></b></div>');
+
+function $QJsrsContext($name)
+{
+    var $this = this,
+        $container,
+        $callback,
+        $html;
+
+    $this.$load = function($url, $contextCallback, $post, $local, $XMLHttpPreferred)
+    {
+        $callback = $contextCallback;
+
+        $this.q = $url;
+
+        if ($post || !$local)
+            $url[3] = $post,
+            $url[4] = $local,
+            $url = base('QJsrs.html', 0, 1);
+        else $url = $url[0] + $url[1];
+
+        // For GET requests, we prefer direct <script> tag creation rather than XMLHttpRequest:
+        // this prevents a caching bug in Firefox < 1.5 and works in IE even when ActiveX is disabled
+        if (!($XMLHttpPreferred && $local && $XMLHttp) && !$post && ('Gecko' == navigator.product || 'object' == typeof $document.onreadystatechange))
+            $container = $QJsrs.$withScript($this.q[0] + $this.q[1], function() {$this.$driver($this.$release);});
+        else if ($local && $XMLHttp)
+        {
+            $container = $XMLHttp - 1 ? new XMLHttpRequest : new ActiveXObject('Microsoft.XMLHTTP');
+            $container.onreadystatechange = function()
+            {
+                4 == $container.readyState && $this.$driver($this.$release, $container.responseText, 1);
+            }
+
+            if ($post)
+                $container.open('POST', $this.q[0], 1),
+                $container.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'),
+                $container.send($this.q[1]);
+            else
+                $container.open('GET', $url, 1),
+                $container.send('');
+        }
+        else if ($html) $win.frames[$name].location.replace($url);
+        else
+        {
+            if (!$div) $div = $document.getElementById('divQJsrs');
+
+            $html = $document.createElement('iframe');
+            $html.name = $name;
+            $html.src = $url;
+            $html.width = $html.height = $html.frameBorder = 0;
+            $html.tabIndex = -1;
+            $div.insertBefore($html, $div.firstChild);
+
+            $html = 1;
+        }
+    }
+
+    $this.$release = function($result)
+    {
+        if ($container)
+        {
+            if ($container.onload) $container.onload = $emptyFunction;
+            $container.onreadystatechange = $emptyFunction;
+            $container.abort();
+        }
+
+        if ($callback && $result>='' || $result < 0) $callback($result);
+
+        $container = $callback = 0;
+    }
+}
+
+$window.loadQJsrs = function($context, $result)
+{
+    $context = $contextPool[ parseInt($context.name ? $context.name.substr(1) : $context) ];
+
+    if ($result >= '') setTimeout(function() {$context.$driver($context.$release, $result);}, 0); // The timeout is a workaround for a bug with relative directories
+
+    return $context;
+}
+
+function $QJsrs($URL, $POST, $antiCSRF, $XMLHttpPreferred)
+{
+    var $this = this,
+        $pool = [],
+        $poolLen = 0,
+        $localTimer = 0,
+        $context,
+        $callback,
+        $url = base(),
+        $i = '?',
+        $LOCAL = location;
+
+    if (!$URL.indexOf($url)) $URL = $URL.substr($url.length);
+    if ($URL.indexOf($i)<0) $URL += $i;
+
+    $URL = base($URL);
+    
+    $LOCAL = 0 == $URL.indexOf($LOCAL.protocol+'//'+$LOCAL.hostname);
+    $POST = $POST ? 1 : 0;
+
+    $this.driver = function($callback, $text, $raw)
+    {
+        if ($text>='')
+        {
+            if ($raw) eval('$text=' + $text.replace(/<\/.*/, '').substr(16)), w; // w is for JSqueeze
+        }
+        else $text = window.q;
+
+        $callback( eval('$text=' + $text) );
+    }
+
+    $this.replace = function($vararray, $function)
+    {
+        $this.abort();
+        $this.push($vararray, $function);
+    }
+
+    $this.push = function($vararray, $function)
+    {
+        if (!$loadCounter)
+        {
+            if ($masterTimer) $masterTimer = clearTimeout($masterTimer);
+            else $QJsrs.onloading();
+        }
+
+        ++$loadCounter;
+
+        $function = $function || $defaultFunction;
+
+        if (($antiCSRF || $POST) && !$vararray.T$) $vararray.T$ = antiCSRF;
+
+        $url = [];
+        for ($i in $vararray) if ('function' != typeof $vararray[$i]) $url.push('&' + eUC($i) + '=' + eUC($vararray[$i])); // Be aware that Konquerors for(..in..) loop does not preserve the order of declaration
+        $url = [$URL, $url.join(''), $vararray];
+
+        if ($context) $pool[$poolLen++] = [$url, $function];
+        else
+        {
+            if ($localTimer) $localTimer = clearTimeout($localTimer);
+            else $this.onloading();
+
+            $context = $contextPool.length;
+            for ($i = 0; $i < $context; ++$i) if (!$contextPool[$i].$driver) break;
+            if ($i == $context) $contextPool[$i] = new $QJsrsContext('_' + $i), // The '_' prefix prevents confusion of frames['0'] and frames[0] for some browsers
+
+            '' + $function; // Dummy line, but if missing, both IE and Mozilla bug !?
+            $callback = $function;
+
+            $context = $contextPool[$i];
+            $context.$driver = $this.driver,
+            $context.$load($url, $release, $POST, $LOCAL, $XMLHttpPreferred);
+        }
+    }
+
+    $this.abort = function()
+    {
+        if ($context) $context.$release(), $release(0, 1);
+    }
+
+    function $release($a, $abort)
+    {
+        $abort
+            ? $loadCounter = $poolLen = $pool.length = 0
+            : $callback($a), --$loadCounter;
+
+        if ($poolLen)
+        {
+            $a = $pool[0];
+            $pool = $pool.slice(1);
+            $poolLen--;
+            $callback = $a[1];
+
+            return $context.$load($a[0], $release, $POST, $LOCAL, $XMLHttpPreferred);
+        }
+
+        $callback = $context = $context.$driver = 0;
+
+        $localTimer = setTimeout($QJsrs.onloaded, 10);
+        if (!$loadCounter) $masterTimer = setTimeout($this.onloaded, 10);
+    }
+
+    $this.onloading = $this.onloaded = $emptyFunction;
+}
+
+$QJsrs.onloading = $QJsrs.onloaded = $emptyFunction;
+$QJsrs.setCallback = function($function)
+{
+    $defaultFunction = $function || $defaultFunction;
+    return $QJsrs;
+}
+
+return $QJsrs;
+
+})();
+
+QJsrs.$withScript = function($url, $callback)
+{
+    var $script = document.createElement('script');
+    
+    $script.abort = function()
+    {
+        $script.parentNode.removeChild($script);
+        $script = 0;
+    }
+
+    $script.type = 'text/javascript';
+    $script.charset = 'utf-8';
+    $script.src = $url;
+    $script.onload = $script.onreadystatechange = function($event)
+    {
+        if (
+            !(
+                   ($event = $event || window.event)
+                && ($event = $event.target || $event.srcElement)
+                && ('undefined' != typeof $event.readyState)
+            )
+            || 'loaded'   == $event.readyState
+            || 'complete' == $event.readyState
+        ) $callback = $callback && $callback() && 0;
+    }
+
+    $url = document.getElementsByTagName('head')[0];
+    $url.insertBefore($script, $url.firstChild);
+    $url = 0;
+
+    return $script;
+};

@@ -1,0 +1,29 @@
+{* vi: set fenc=utf-8 ts=4 sw=4 et:
+ *
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ *}
+<!-- IF a$post_office_box
+    || a$extended_address
+    || a$street_address
+    || a$locality
+    || a$region
+    || a$postal_code
+    || a$country_name
+-->
+<div class="adr">
+<!--
+    IF a$post_office_box  --><div  class="post-office-box">{a$post_office_box}</div><!-- END:IF
+    IF a$extended_address --> <div  class="extended-address">{a$extended_address}</div><!-- END:IF
+    IF a$street_address   --> <div  class="street-address">{a$street_address}</div><!-- END:IF
+    IF a$postal_code      --> <span class="postal-code">{a$postal_code}</span><!-- END:IF
+    IF a$locality         --> <span class="locality">{a$locality}</span>{a$region|test:','}<!-- END:IF
+    IF a$region           --> <span class="region">{a$region}</span><!-- END:IF -->{a$country_name|test:','}<!--
+    IF a$country_name     --> <span class="country-name">{a$country_name}</span><!-- END:IF
+-->
+</div>
+<!-- END:IF -->

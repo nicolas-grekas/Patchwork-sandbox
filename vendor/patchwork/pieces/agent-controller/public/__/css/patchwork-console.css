@@ -1,0 +1,159 @@
+body
+{
+    font-size: 11px;
+    margin: 0;
+    padding: 0;
+    background-color: white;
+}
+
+.console
+{
+    margin-left: 175px;
+}
+
+.event-tabs
+{
+    background-color: #fafafa;
+    position: absolute;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 150px;
+    height: 100%;
+    padding: 5px;
+}
+
+.event-tabs>.event-title
+{
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 2px;
+}
+
+.event-tabs>.event-title.empty
+{
+    color: gray;
+}
+
+.event-tabs .count
+{
+    position: absolute;
+    right: 7px;
+    color: black;
+}
+
+.event-tabs>a:hover
+{
+    background-color: #f4f4f4;
+}
+
+br /* Hide Chrome inserted BR */
+{
+    display: none;
+}
+
+.event
+{
+    color: gray;
+    margin: 0;
+    padding: 0;
+    font-style: italic;
+    font-family: inherit;
+    white-space: pre;
+}
+
+.array-compact
+{
+    white-space: nowrap; /* This rule makes IE slow as hell */
+}
+
+a,
+.arrow,
+.const,
+.class,
+.alias,
+.handle,
+.string
+{
+    color: black;
+    font-style: normal;
+    font-family: sans-serif;
+}
+
+a
+{
+    color: blue;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.event a
+{
+    display: inline-block;
+    position: relative;
+    right: 15px;
+    width: 0;
+}
+
+.const
+{
+    color: blue;
+}
+
+.string
+{
+    color: purple;
+    background-color: #F9F9F9;
+}
+
+.empty.string
+{
+    width: 3px;
+    height: 1em;
+    display: inline-block;
+}
+
+.key
+{
+    font-family: monospace;
+    background-color: white;
+}
+
+.public
+{
+    color: green;
+}
+
+.protected
+{
+    color: orange;
+}
+
+.private
+{
+    color: red;
+}
+
+.arrow
+{
+    color: gray;
+    background-color: white;
+}
+
+.event.silenced>.array-compact span
+{
+    color: silver;
+    background-color: white;
+}
+
+.array-compact a,
+.array-compact .key
+{
+    display: none;
+}
+
+.key.string
+{
+    display: inline;
+}

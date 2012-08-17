@@ -1,0 +1,34 @@
+<public:component lightWeight="true">
+<public:attach event="onmousewheel" onevent="wheel()" />
+<public:attach event="onfocus"      onevent="down()" />
+<public:attach event="onblur"       onevent="down()" />
+<public:attach event="onkeydown"    onevent="down()" />
+<public:attach event="onmousedown"  onevent="down()" />
+<public:attach event="onchange"     onevent="change()" />
+<script>
+
+var i = 0;
+
+function wheel() {i = element.selectedIndex + 1}
+function down()  {i = 0}
+function change()
+{
+    if (i)
+    {
+        if (element.selectedIndex != i - 1)
+        {
+            element.selectedIndex = i - 1;
+            if (element.onchange) element.onchange();
+        }
+
+        window.focus();
+    }
+}
+
+
+// TODO?
+// - fix overlap bug
+// - fix options truncation
+
+</script>
+</public:component>

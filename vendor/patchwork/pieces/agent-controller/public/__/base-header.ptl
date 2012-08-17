@@ -1,0 +1,44 @@
+{* vi: set fenc=utf-8 ts=4 sw=4 et:
+ *
+ * Copyright (C) 2012 Nicolas Grekas - p@tchwork.com
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the (at your option):
+ * Apache License v2.0 (http://apache.org/licenses/LICENSE-2.0.txt), or
+ * GNU General Public License v2.0 (http://gnu.org/licenses/gpl-2.0.txt).
+ *}
+<!-- IF !g+1$headerNesting -->
+<!-- SERVERSIDE -->
+<!-- SET $_lang --><!-- IF g$__LANG__ --> lang="{g$__LANG__}"<!-- END:IF --><!-- END:SET -->
+<!doctype html>
+<!--[if lt IE 7]><html{$_lang} class="no-js lt-ie9 lt-ie8 lt-ie7 ie6"><![endif]-->
+<!--[if IE 7]><html{$_lang} class="no-js lt-ie9 lt-ie8 ie7"><![endif]-->
+<!--[if IE 8]><html{$_lang} class="no-js lt-ie9 ie8"><![endif]-->
+<!--[if gt IE 8]><!--><html{$_lang} class="no-js"><!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <script src="{base:'js/w'}"></script>
+<!-- END:SERVERSIDE -->
+
+    <title>{a$title|replace:'<[^>]*':''|replace:'>':''}</title>
+
+    <meta name="generator" content="Patchwork">
+
+    <link rel="stylesheet" type="text/css" href="{a$css|default:'css/style'|base}">
+
+    <!--
+
+    LOOP g$__LANG_ALT__
+        IF $lang != g$__LANG__
+            --><link rel="alternate" type="text/html" href="{$href}" title="{$title}" hreflang="{$lang}" lang="{$lang}"><!--
+        END:IF
+    END:LOOP
+
+    -->
+
+    {a$head}
+<!-- SERVERSIDE -->
+</head>
+<!-- END:SERVERSIDE -->
+<body<!-- IF a$class --> class="{a$class}"<!-- END:IF -->>{a$body}
+<!-- END:IF -->

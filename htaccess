@@ -1,0 +1,103 @@
+Allow from all
+AcceptPathInfo On
+DirectoryIndex index.php
+
+# Uncomment to enable PHP5
+# - on OVH:
+#SetEnv PHP_VER 5
+#SetEnv REGISTER_GLOBALS 0
+#SetEnv ZEND_OPTIMIZER   1
+#SetEnv MAGIC_QUOTES     0
+# - on free.fr:
+#php 1
+# - on 1&1:
+#AddType x-mapp-php5 .php
+
+# A first and default way to get friendly URLs
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  <Files index>
+    Options -Multiviews
+  </Files>
+
+  # Avoid TRACE and TRACK method to prevent "Cross-Site-Tracing"
+  RewriteCond %{REQUEST_METHOD} ^TRAC
+  RewriteRule .? - [NS,F]
+
+  # Uncomment to enable the web server to deliver files in the current directory.
+  # For security reason this is not advised if you don't know what you are doing.
+  #RewriteRule ^index\.php(/.*)?$ - [S=1]
+  #RewriteCond %{REQUEST_FILENAME} -f [OR]
+  #RewriteCond %{REQUEST_FILENAME} -d [OR]
+  #RewriteCond %{REQUEST_FILENAME} -l
+  #RewriteRule .+ - [S=1]
+
+  RewriteCond %{ENV:PATCHWORK_REQUEST} ^$
+  RewriteRule .* index.php [E=PATCHWORK_REQUEST:/$0]
+</IfModule>
+
+# A second way to get friendly URLs
+#<Files bootstrap_file_here>
+#  ForceType application/x-httpd-php
+#</Files>
+
+# A third way to get friendly URLs
+# http://httpd.apache.org/docs/2.0/content-negotiation.html#multiviews
+#Options +Multiviews
+#MultiviewsMatch Handlers Filters
+
+# You should really consider X-Sendfile or equivalent
+<IfModule mod_xsendfile.c>
+  SetEnv PATCHWORK_XSENDFILE "X-Sendfile: %s"
+  XSendFile           On
+  XSendFileAllowAbove On
+</IfModule>
+
+<IfModule mod_php5.c>
+  # Edit this to your default timezone. See http://php.net/timezones
+  #php_value date.timezone "Universal"
+
+  # display_errors is set to Off in the PHP code.
+  # For now, we want to display any early error.
+  php_flag  display_errors           On
+  php_flag  magic_quotes_gpc         Off
+  php_flag  register_globals         Off
+  php_flag  register_long_arrays     Off
+  php_flag  register_argc_argv       Off
+  php_flag  auto_globals_jit          On
+  php_flag  session.auto_start       Off
+  php_value pcre.backtrack_limit 5000000
+  php_value pcre.recursion_limit   10000
+  php_value serialize_precision       17
+
+  # Tuning of mbstring
+  php_value mbstring.func_overload             0
+  php_value mbstring.language          "neutral"
+  php_value mbstring.internal_encoding    "pass"
+  php_value mbstring.substitute_character "none"
+  php_flag  mbstring.encoding_translation    Off
+  php_value mbstring.http_input           "pass"
+  php_value mbstring.http_output          "pass"
+  php_value mbstring.script_encoding      "pass"
+
+  # Tune this if you have problems uploading large files
+  # General rule is:
+  # - upload_max_filesize = the size of the largest file you want to accept
+  # - post_max_size >= 2 x upload_max_filesize
+  # - memory_limit  > post_max_size
+  #php_value upload_max_filesize "32M"
+  #php_value post_max_size       "64M"
+  #php_value memory_limit       "128M"
+
+  # More tuning, for performance, but only if the current
+  # directory contains only applications that can handle it.
+  #php_flag  mbstring.encoding_translation On
+  #php_value mbstring.internal_encoding "UTF-8"
+  #php_value mbstring.http_input        "UTF-8"
+  #php_value exif.encode_unicode        "UTF-8"
+  #php_value exif.encode_jis            "UTF-8"
+  #php_value iconv.input_encoding       "UTF-8//IGNORE"
+  #php_value iconv.internal_encoding    "UTF-8//IGNORE"
+  #php_value iconv.output_encoding      "UTF-8//IGNORE"
+</IfModule>
